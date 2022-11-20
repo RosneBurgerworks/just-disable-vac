@@ -11,16 +11,12 @@
 
 #include "header.h"
 
-int EXPORT nftw(const char *path,
-	int (*fn)(const char *, const struct stat *, int, struct FTW *),
-	int maxfds, int flags);
+int EXPORT nftw(const char* path, int (* fn)(const char*, const struct stat*, int, struct FTW*), int maxfds, int flags);
 
-char * EXPORT fgets(char *s, int n, FILE *stream);
+char* EXPORT fgets(char* s, int n, FILE* stream);
 
 #if LOG
+int EXPORT fclose(FILE* stream);
 
-	int EXPORT fclose(FILE *stream);
-
-	FILE * EXPORT fopen(const char *filename, const char *mode);
-
+FILE* EXPORT fopen(const char* filename, const char* mode);
 #endif
