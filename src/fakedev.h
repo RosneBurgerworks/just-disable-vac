@@ -11,15 +11,15 @@
 
 typedef struct fakedev_pci_bus_s
 {
-	unsigned domain;
-	unsigned bus;
+	unsigned int domain;
+	unsigned int bus;
 } fakedev_pci_bus_s;
 
 typedef struct fakedev_pci_s
 {
 	struct fakedev_pci_bus_s* bus;
-	unsigned number;
-	unsigned function;
+	unsigned int number;
+	unsigned int function;
 } fakedev_pci_s;
 
 HIDDEN const char* fakedev();
@@ -38,6 +38,6 @@ int HIDDEN fakedev_generate_pci_bus(struct fakedev_pci_bus_s* bus);
 
 int HIDDEN fakedev_generate_pci_device(struct fakedev_pci_s* pci);
 
-void HIDDEN fakedev_make_usb(struct fakedev_pci_s* pci, unsigned usb, unsigned idVendor, unsigned idProduct);
+void HIDDEN fakedev_make_usb(struct fakedev_pci_s* pci, unsigned int usb, unsigned int idVendor, unsigned int idProduct);
 
-void HIDDEN fakedev_make_pci(struct fakedev_pci_s* pci, unsigned vendor, unsigned device, unsigned class);
+void HIDDEN fakedev_make_pci(struct fakedev_pci_s* pci, unsigned int vendor, unsigned int device, unsigned int class);

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(just-disable-vac VERSION 0.0.1)
-set(compile_options -O3 -s -fvisibility=hidden -fvisibility-inlines-hidden)
-set(link_options "-O3 -s -fvisibility=hidden -fvisibility-inlines-hidden -ldl")
+set(compile_options -Ofast -s -fvisibility=hidden -fvisibility-inlines-hidden)
+set(link_options "-Ofast -s -fvisibility=hidden -fvisibility-inlines-hidden -ldl")
 
 add_library(just-disable-vac64 SHARED "")
 target_compile_options(just-disable-vac64 PRIVATE "${compile_options}")

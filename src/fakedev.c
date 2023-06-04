@@ -8,7 +8,10 @@
 #include "fakedev.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <sys/stat.h>
+#include <sys/random.h>
+#include <time.h>
 
 HIDDEN char* _fakedev_path = 0;
 HIDDEN int _fakedev_init = 0;
@@ -29,6 +32,15 @@ HIDDEN const char* fakedev_generate()
 	_fakedev_init = 1;
 	_fakedev_path = malloc(256);
 	snprintf(_fakedev_path, 255, "/tmp/devXXXXXX");
+
+    // Generate a random seed, and seed the random number generator with it in order to increase randomness
+    unsigned int seed;
+    bool use_time = false;
+    if (getrandom(&seed, sizeof(seed), GRND_NONBLOCK) == -1)
+        use_time = true;
+
+    srand(use_time ? time(NULL) : seed);
+
 	if (mkdtemp(_fakedev_path))
 	{
 		struct fakedev_pci_bus_s bus;
@@ -41,9 +53,9 @@ HIDDEN const char* fakedev_generate()
 
 void HIDDEN fakedev_make_populated_bus(struct fakedev_pci_bus_s* bus)
 {
-	if (0 == fakedev_generate_pci_bus(bus))
+	if (fakedev_generate_pci_bus(bus) == 0)
 	{
-		for (int i = 0; i < (6 + rand() % 12); i++)
+		for (unsigned int i = 0; i < 6 + rand() % 12; ++i)
 		{
 			struct fakedev_pci_s pci;
 			pci.bus = bus;
@@ -56,14 +68,13 @@ void HIDDEN fakedev_make_populated_bus(struct fakedev_pci_bus_s* bus)
 
 void HIDDEN fakedev_make_device(struct fakedev_pci_s* pci)
 {
-	if (0 == fakedev_generate_pci_device(pci))
+	if (fakedev_generate_pci_device(pci) == 0)
 	{
 		// 50% chance to make USB device
 		if (rand() % 2)
 			fakedev_make_usb(pci, rand() % 8, rand() % 0xFFFF, rand() % 0xFFFF);
 		else
-			fakedev_make_pci(pci, rand() % 0xFFFF, rand() % 0xFFFF, (rand() % 0x14) << 16);
-
+			fakedev_make_pci(pci, rand() % 0xFFFF, rand() % 0xFFFF, (rand() % 20) << 16);
 	}
 }
 
@@ -92,25 +103,25 @@ int HIDDEN fakedev_generate_pci_device(struct fakedev_pci_s* pci)
 	return mkdir(temp, FAKEDEV_ACCESS);
 }
 
-void HIDDEN fakedev_make_usb(struct fakedev_pci_s* pci, unsigned usb, unsigned idVendor, unsigned idProduct)
+void HIDDEN fakedev_make_usb(struct fakedev_pci_s* pci, unsigned int usb, unsigned int idVendor, unsigned int idProduct)
 {
 	char filename[512];
 	char path[512];
-	FILE* fd = 0;
+	FILE* fd;
 
 	fakedev_device_path(path, pci);
 
 	snprintf(filename, 511, "%s/usb%u", path, usb);
-	if (0 == mkdir(filename, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH))
+	if (mkdir(filename, FAKEDEV_ACCESS) == 0)
 	{
 		snprintf(filename, 511, "%s/usb%u/idVendor", path, usb);
-		if (0 != (fd = fopen(filename, "w")))
+		if ((fd = fopen(filename, "w")) != 0)
 		{
 			fprintf(fd, "%04x\n", idVendor);
 			fclose(fd);
 		}
 		snprintf(filename, 511, "%s/usb%u/idProduct", path, usb);
-		if (0 != (fd = fopen(filename, "w")))
+		if ((fd = fopen(filename, "w")) != 0)
 		{
 			fprintf(fd, "%04x\n", idProduct);
 			fclose(fd);
@@ -118,28 +129,28 @@ void HIDDEN fakedev_make_usb(struct fakedev_pci_s* pci, unsigned usb, unsigned i
 	}
 }
 
-void HIDDEN fakedev_make_pci(struct fakedev_pci_s* pci, unsigned vendor, unsigned device, unsigned class)
+void HIDDEN fakedev_make_pci(struct fakedev_pci_s* pci, unsigned int vendor, unsigned int device, unsigned int class)
 {
 	char filename[512];
 	char path[512];
-	FILE* fd = 0;
+	FILE* fd;
 
 	fakedev_device_path(path, pci);
 
 	snprintf(filename, 511, "%s/device", path);
-	if (0 != (fd = fopen(filename, "w")))
+	if ((fd = fopen(filename, "w")) != 0)
 	{
 		fprintf(fd, "0x%04x\n", device);
 		fclose(fd);
 	}
 	snprintf(filename, 511, "%s/vendor", path);
-	if (0 != (fd = fopen(filename, "w")))
+	if ((fd = fopen(filename, "w")) != 0)
 	{
 		fprintf(fd, "0x%04x\n", vendor);
 		fclose(fd);
 	}
 	snprintf(filename, 511, "%s/class", path);
-	if (0 != (fd = fopen(filename, "w")))
+	if ((fd = fopen(filename, "w")) != 0)
 	{
 		fprintf(fd, "0x%06x\n", class);
 		fclose(fd);

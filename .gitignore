@@ -3,3 +3,5 @@
 bin32
 bin64
 build
+cmake-build-debug
+.idea
