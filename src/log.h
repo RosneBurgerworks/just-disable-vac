@@ -21,6 +21,6 @@
 
 #else
 
-#define log(...)
+#define log(...)    ;
 
 #endif

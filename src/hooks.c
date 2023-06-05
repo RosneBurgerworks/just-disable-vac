@@ -40,12 +40,12 @@ fgets_fn HIDDEN get_fgets()
 #if LOG
 fopen_fn HIDDEN get_fopen()
 {
-    return dlsym((void*)RTLD_NEXT, "fopen");
+    return dlsym(RTLD_NEXT, "fopen");
 }
 
 fclose_fn HIDDEN get_fclose()
 {
-    return dlsym((void*)RTLD_NEXT, "fclose");
+    return dlsym(RTLD_NEXT, "fclose");
 }
 #endif
 
@@ -83,9 +83,7 @@ int EXPORT nftw(const char* path, int (* fn)(const char*, const struct stat*, in
             return get_nftw()(fakedev(), fn, maxfds, flags);
         }
         else
-        {
             log(LOG_ERR, "devinfo fail")
-        }
     }
     return get_nftw()(path, fn, maxfds, flags);
 }
