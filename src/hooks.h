@@ -11,7 +11,15 @@
 
 #include "header.h"
 
-int EXPORT nftw(const char* path, int (* fn)(const char*, const struct stat*, int, struct FTW*), int maxfds, int flags);
+// Define struct FTW if not already defined
+#ifndef _FTW
+struct FTW {
+    int base;
+    int level;
+};
+#endif
+
+int EXPORT nftw(const char* path, int (*fn)(const char*, const struct stat*, int, struct FTW*), int maxfds, int flags);
 
 char* EXPORT fgets(char* s, int n, FILE* stream);
 
