@@ -38,6 +38,6 @@ int fakedev_generate_pci_bus(struct fakedev_pci_bus_s* bus);
 
 int fakedev_generate_pci_device(struct fakedev_pci_s* pci);
 
-void fakedev_make_usb(struct fakedev_pci_s* pci, unsigned int usb, unsigned int idVendor, unsigned int idProduct);
+void fakedev_make_usb(struct fakedev_pci_s* pci, unsigned int usbPort, unsigned int idVendor, unsigned int idProduct);
 
-void fakedev_make_pci(struct fakedev_pci_s* pci, unsigned int vendor, unsigned int device, unsigned int class);
+void fakedev_make_pci(struct fakedev_pci_s* pci, unsigned int vendor, unsigned int device, unsigned int deviceClass);
