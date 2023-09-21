@@ -129,7 +129,7 @@ void fakedev_make_usb(fakedev_pci_s* pci, unsigned int usb, unsigned int idVendo
     }
 }
 
-void fakedev_make_pci(fakedev_pci_s* pci, unsigned int vendor, unsigned int device, unsigned int class)
+void fakedev_make_pci(fakedev_pci_s* pci, unsigned int vendor, unsigned int device, unsigned int deviceClass)
 {
     char filename[512];
     char path[512];
@@ -152,7 +152,7 @@ void fakedev_make_pci(fakedev_pci_s* pci, unsigned int vendor, unsigned int devi
     std::snprintf(filename, 511, "%s/class", path);
     if ((fd = std::fopen(filename, "w")) != nullptr)
     {
-        std::fprintf(fd, "0x%06x\n", class);
+        std::fprintf(fd, "0x%06x\n", deviceClass);
         std::fclose(fd);
     }
 }
