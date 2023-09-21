@@ -21,8 +21,8 @@ target_include_directories(just-disable-vac32 PRIVATE "${CMAKE_CURRENT_LIST_DIR}
 set_target_properties(just-disable-vac32 PROPERTIES OUTPUT_NAME "vpcfs")
 set_target_properties(just-disable-vac32 PROPERTIES SUFFIX ".so.0")
 
-set(files "${CMAKE_CURRENT_LIST_DIR}/src/hooks.c"
-        "${CMAKE_CURRENT_LIST_DIR}/src/fakedev.c")
+set(files "${CMAKE_CURRENT_LIST_DIR}/src/hooks.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/src/fakedev.cpp")
 target_sources(just-disable-vac64 PRIVATE ${files})
 target_sources(just-disable-vac32 PRIVATE ${files})
 

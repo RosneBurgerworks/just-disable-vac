@@ -1,18 +1,18 @@
 /*
- * hooks.c
+ * hooks.cpp
  *
- *  Created on: Aug 10, 2017
- *      Author: nullifiedcat
+ *  Created on: September 20, 2023
+ *      Author: rosne-gamingyt
  */
 
-#include <stdio.h>
+#include <iostream>
 #include <dlfcn.h>
 #include <ftw.h>
-#include <string.h>
-#include <malloc.h>
-#include "log.h"
-#include "header.h"
-#include "fakedev.h"
+#include <cstring>
+#include <cstdlib>
+#include "log.hpp"
+#include "header.hpp"
+#include "fakedev.hpp"
 
 /*
  * ORIGINAL FUNCTIONS TYPES
@@ -29,23 +29,23 @@ typedef int (*nftw_fn)(const char*, int (*)(const char*, const struct stat*, int
 
 nftw_fn HIDDEN get_nftw()
 {
-    return dlsym(RTLD_NEXT, "nftw");
+    return reinterpret_cast<nftw_fn>(dlsym(RTLD_NEXT, "nftw"));
 }
 
 fgets_fn HIDDEN get_fgets()
 {
-    return dlsym(RTLD_NEXT, "fgets");
+    return reinterpret_cast<fgets_fn>(dlsym(RTLD_NEXT, "fgets"));
 }
 
 #if LOG
 fopen_fn HIDDEN get_fopen()
 {
-    return dlsym(RTLD_NEXT, "fopen");
+    return reinterpret_cast<fopen_fn>(dlsym(RTLD_NEXT, "fopen"));
 }
 
 fclose_fn HIDDEN get_fclose()
 {
-    return dlsym(RTLD_NEXT, "fclose");
+    return reinterpret_cast<fclose_fn>(dlsym(RTLD_NEXT, "fclose"));
 }
 #endif
 
@@ -62,7 +62,7 @@ fclose_fn HIDDEN get_fclose()
 FILE* fopen(const char* filename, const char* mode)
 {
     FILE* retval = get_fopen()(filename, mode);
-    log(LOG_DEBUG, "fopen %s %08x '%s'", mode, retval, filename);
+    log(LOG_DEBUG, "fopen %s %08x '%s'", mode, reinterpret_cast<unsigned int>(retval), filename);
     if (strstr(filename, "/sys/devices"))
         log(LOG_WARNING, "fopen /sys/devices is accessed!");
     return retval;
@@ -75,7 +75,7 @@ FILE* fopen(const char* filename, const char* mode)
 int EXPORT nftw(const char* path, int (*fn)(const char*, const struct stat*, int, struct FTW*), int maxfds, int flags)
 {
     log(LOG_INFO, "nftw %s", path);
-    if (!strcmp(path, "/sys/devices") || !strcmp(path, "/sys/devices/"))
+    if (!std::strcmp(path, "/sys/devices") || !std::strcmp(path, "/sys/devices/"))
     {
         if (fakedev() != 0)
         {
@@ -96,7 +96,7 @@ int EXPORT nftw(const char* path, int (*fn)(const char*, const struct stat*, int
  */
 EXPORT char* fgets(char* s, int n, FILE* stream)
 {
-    char* buffer = malloc(n);
+    char* buffer = reinterpret_cast<char*>(std::malloc(n));
     char* retval = get_fgets()(buffer, n, stream);
 
     if (retval == buffer)
@@ -105,38 +105,38 @@ EXPORT char* fgets(char* s, int n, FILE* stream)
 
         int tracerPID = 0;
 
-        if (sscanf(buffer, "TracerPid:\t%d", &tracerPID) == 1)
+        if (std::sscanf(buffer, "TracerPid:\t%d", &tracerPID) == 1)
         {
             log(LOG_WARNING, "tracer (%d)", tracerPID);
-            strcpy(buffer, "TracerPid:\t0\n");
+            std::strcpy(buffer, "TracerPid:\t0\n");
         }
 
         while (strstr(buffer, "cathook") || strstr(buffer, "libvpcfs.so"))
         {
             log(LOG_WARNING, "intercepted '%s'", buffer);
             retval = get_fgets()(buffer, n, stream);
-            if (sscanf(buffer, "TracerPid:\t%d", &tracerPID) == 1)
+            if (std::sscanf(buffer, "TracerPid:\t%d", &tracerPID) == 1)
             {
                 log(LOG_WARNING, "tracer (%d)", tracerPID);
-                strcpy(buffer, "TracerPid:\t0\n");
+                std::strcpy(buffer, "TracerPid:\t0\n");
             }
             if (retval == buffer)
                 retval = s;
             else
-                return 0;
+                return nullptr;
         }
 
     }
 
-    memcpy(s, buffer, n);
-    free(buffer);
+    std::memcpy(s, buffer, n);
+    std::free(buffer);
     return retval;
 }
 
 #if LOG
 int fclose(FILE* stream)
 {
-    log("fclose %08x", stream);
+    log("fclose %08x", reinterpret_cast<unsigned int>(stream));
     return get_fclose()(stream);
 }
 #endif

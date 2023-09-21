@@ -1,14 +1,15 @@
 /*
- * log.h
+ * log.hpp
  *
- *  Created on: Aug 11, 2017
- *      Author: nullifiedcat
+ *  Created on: September 20, 2023
+ *      Author: rosne-gamingyt
  */
 
 #pragma once
 
 #include <syslog.h>
-#include "header.h"
+#include <cstdio>
+#include "header.hpp"
 
 #if LOG
 
@@ -17,8 +18,8 @@
         openlog("libvpcfs", LOG_PID, LOG_USER); \
         syslog(level, __VA_ARGS__); \
         closelog(); \
-        printf(__VA_ARGS__); \
-        printf("\n"); \
+        std::printf(__VA_ARGS__); \
+        std::printf("\n"); \
     } while(0)
 
 #else
